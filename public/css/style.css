@@ -1,0 +1,18 @@
+#submit {
+  display: block;
+  margin-top: 10px;
+}
+
+.sidebar-brand .sidebar-brand-text {
+  font-size: 0.8rem;
+}
+
+.text-center .error {
+  width: 12.6rem;
+}
+
+.d-lg-block.bg-login-image {
+  background: url(/images/table-with-charts.jpg);
+  background-position: center;
+  background-size: cover;
+}

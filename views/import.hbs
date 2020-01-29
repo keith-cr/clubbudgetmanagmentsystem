@@ -1,7 +1,32 @@
-<h1>Import Budget</h1>
-<input type="file" name="xlfile" id="xlf">
-<script lang="javascript" src="js/xlsx.full.min.js"></script>
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800">Import Budget</h1>
+</div>
+{{#each successes}}
+  <div class="alert alert-success" role="alert">
+    {{this}}
+  </div>
+{{/each}}
+{{#each errors}}
+  <div class="alert alert-danger" role="alert">
+    {{this}}
+  </div>
+{{/each}}
+<form>
+  <div class="form-group">
+    <label for="clubSelect">Club</label>
+    <select class="form-control" id="clubSelect">
+      {{#each clubs}}
+        <option value={{ID}}>{{Name}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <input type="file" name="xlfile" id="xlf">
+  <button type="submit" class="btn btn-primary" id="submit">Submit</button>
+</form>
+<script lang="javascript" src="/js/xlsx.full.min.js"></script>
 <script>
+var year;
 function handleFile(e) {
   var files = e.target.files, f = files[0];
   var reader = new FileReader();
@@ -17,20 +42,29 @@ function handleFile(e) {
     var fiscalyear = (desired_cell ? desired_cell.v : undefined);
 
     const regex = /\d+/;
-    const year = fiscalyear.match(regex)[0];
-
-    let params="year="+year+"&clubid="+1;
-    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-    xhr.open('POST', '/import');
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState>3 && xhr.status==200) { console.log(xhr.responseText) }
-    };
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.send(params);
+    year = fiscalyear.match(regex)[0];
   };
   reader.readAsArrayBuffer(f);
 }
+
+function submit(e) {
+  var club_select_dom_element = document.getElementById('clubSelect');
+  e.preventDefault();
+  let params="year="+year+"&clubid="+club_select_dom_element.value;
+  var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+  xhr.open('POST', '/import');
+  xhr.onreadystatechange = function() {
+      if (xhr.readyState > 3 && xhr.status == 200) { 
+        window.location.reload();
+      }
+  };
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.send(params);
+}
+
 var input_dom_element = document.getElementById('xlf');
 input_dom_element.addEventListener('change', handleFile, false);
+var submit_dom_element = document.getElementById('submit');
+submit_dom_element.addEventListener('click', submit);
 </script>

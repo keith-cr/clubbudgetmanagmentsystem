@@ -9,7 +9,8 @@ router.get('/', async function(req, res, next) {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME)
       const result = await sql.query`select * from club`
-      res.render('index', { title: 'Club Budget Management System', data: result.recordset });
+      console.log(result.recordset);
+      res.render('index', { title: 'Clubs', data: result.recordset, clubsPage: true });
     } catch (err) {
       console.log(err)
     }
