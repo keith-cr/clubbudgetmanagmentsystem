@@ -27,19 +27,68 @@
 <script lang="javascript" src="/js/xlsx.full.min.js"></script>
 <script>
 var year;
+function Category(number, name) {
+  this.number = number;
+  this.name = name;
+}
+
+var categories = [];
+
+function LineItem(number, name, desc, originalBal) {
+  this.number = number;
+  this.name = name;
+  this.desc = desc;
+  this.originalBal = originalBal;
+}
+
+var lineItems = [];
+
 function handleFile(e) {
   var files = e.target.files, f = files[0];
   var reader = new FileReader();
   reader.onload = function(e) {
+
     var data = new Uint8Array(e.target.result);
     var workbook = XLSX.read(data, {type: 'array'});
 
-    console.log(workbook);
     var first_sheet_name = workbook.SheetNames[0];
     var address_of_cell = 'A3';
     var worksheet = workbook.Sheets[first_sheet_name];
     var desired_cell = worksheet[address_of_cell];
     var fiscalyear = (desired_cell ? desired_cell.v : undefined);
+
+    var numBlanks = 0;
+
+    for(var R = 3; R <= 1000; ++R) {
+      var firstCell = worksheet[XLSX.utils.encode_cell({c:0, r:R})];
+
+      if (firstCell == null || firstCell.v === "") {
+        // blank
+        numBlanks++;
+      } else if (Number.isInteger(firstCell.v)) {
+        // category
+        numBlanks = 0;
+        var catName = worksheet[XLSX.utils.encode_cell({c:1, r:R})].v;
+        categories.push(new Category(firstCell.v, catName));
+      } else if (!isNaN(firstCell.v)) {
+        // line item
+        numBlanks = 0;
+        var name = worksheet[XLSX.utils.encode_cell({c:1, r:R})].v;
+        var desc = worksheet[XLSX.utils.encode_cell({c:7, r:R})].v;
+        var originalBal = worksheet[XLSX.utils.encode_cell({c:5, r:R})].v;
+        console.log(firstCell.v);
+        lineItems.push(new LineItem(firstCell.v, name, desc, originalBal));
+      } else {
+        // other
+        numBlanks = 0;
+      }
+
+      if (numBlanks > 3) {
+        // if we have more than 3 blank lines, assume we've reached end of spreadsheet
+        break;
+      }
+    }
+
 
     const regex = /\d+/;
     year = fiscalyear.match(regex)[0];
@@ -50,17 +99,17 @@ function handleFile(e) {
 function submit(e) {
   var club_select_dom_element = document.getElementById('clubSelect');
   e.preventDefault();
-  let params="year="+year+"&clubid="+club_select_dom_element.value;
-  var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-  xhr.open('POST', '/import');
-  xhr.onreadystatechange = function() {
-      if (xhr.readyState > 3 && xhr.status == 200) { 
-        window.location.reload();
-      }
-  };
-  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send(params);
+  $.ajax({
+    type: 'POST',
+    url: '/import',
+    data: { year: year, clubid: club_select_dom_element.value, lineItems: JSON.stringify(lineItems), categories: JSON.stringify(categories) },
+    success: function() {
+      window.location.reload();
+    },
+    failure: function() {
+      window.location.reload();
+    },
+  });
 }
 
 var input_dom_element = document.getElementById('xlf');

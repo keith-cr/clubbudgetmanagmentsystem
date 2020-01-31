@@ -16,20 +16,38 @@ router.get('/', async function(req, res, next) {
 });
 
 router.post('/', async function (req, res) {
-    let year = req.body.year;
-    let clubid = req.body.clubid;
+    let body = req.body;
+    let year = body.year;
+    let clubid = body.clubid;
+    let categories = JSON.parse(body.categories);
+    let lineItems = JSON.parse(body.lineItems);
+    console.log(categories);
+    console.log(lineItems);
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
-      const result = await sql.query`insert into Budget (Year, ClubID) VALUES (${year}, ${clubid})`
-      console.log(result);
+      await sql.query`EXEC CREATE_BUDGET @Year = ${year}, @ClubID = ${clubid}`;
+      let result = await sql.query`select ID from BUDGET where Year = ${year} and ClubID = ${clubid}`
+      let budgetID = result.recordset[0].ID;
+      for (let category of categories) {
+        await sql.query`EXEC CREATE_CATEGORY @BudgetID = ${budgetID}, @Name = ${category.name}, @Number = ${category.number}`;
+      }
+      for (let lineItem of lineItems) {
+        let catNum = Math.floor(parseFloat(lineItem.number));
+        let catResult = await sql.query`select ID from Category where BudgetID = ${budgetID} and Number = ${catNum}`;
+        let catID = catResult.recordset[0].ID;
+        console.log(lineItem.number);
+        await sql.query`EXEC CREATE_LineItem @ClubID = ${clubid}, @BudgetID = ${result.recordset[0].ID}, 
+          @Number = ${lineItem.number}, @OriginalBalance = ${lineItem.originalBal}, @Description = ${lineItem.desc}, 
+          @Name = ${lineItem.name}, @CategoryID = ${catID}`;
+      }
       req.flash('success', 'Budget file sucessfully imported');
     } catch (err) {
-      if (err.originalError.info.message.includes("Violation of UNIQUE KEY"))
+      if (err.orginalError && err.originalError.info.message.includes("Violation of UNIQUE KEY"))
         req.flash('error', 'Unable to import budget, budget year already exists for that club');
       else
         req.flash('error', 'Unknown error importing file');
-      console.log(JSON.stringify(err.originalError.info.message));
+      console.log(err);
     }
     res.send('');
 });

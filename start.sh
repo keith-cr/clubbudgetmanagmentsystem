@@ -1,1 +1,1 @@
-SET DEBUG=clubbudgetmanagmentsystem:* & npm start
+DEBUG=clubbudgetmanagmentsystem:* npm start
