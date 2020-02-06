@@ -28,7 +28,9 @@
           <tr>
             <td>{{timestamp}}</td>
             <td>{{amount}}</td>
-            <td><a class="btn btn-primary" href="/deduction/{{id}}" role="button">Edit</a><button class="btn btn-warning" role="button">Delete</button></td>
+            <td>
+              <a class="btn btn-primary mr-1" href="/deduction/{{id}}" role="button">Edit</a><button class="btn btn-danger" role="button">Delete</button>
+            </td>
           </tr>
           {{/each}}
         </tbody>
