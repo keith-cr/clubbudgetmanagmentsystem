@@ -2,9 +2,24 @@
   <h1 class="h3 mb-0 text-gray-800">Line Item {{lineitem.number}}</h1>
 </div>
 
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/club/{{lineitem.clubid}}">{{lineitem.clubname}}</a></li>
+    <li class="breadcrumb-item"><a href="/budget/{{lineitem.budgetid}}">{{lineitem.budgetyear}}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Line Item {{lineitem.number}}</li>
+  </ol>
+</nav>
+
 <div class="card shadow mb-4">
-  <div class="card-header py-3">
-    <h6 class="m-0 font-weight-bold text-primary">Deductions</h6>
+  <div class="card-header py-3 container-fluid">
+    <div class="row">
+      <div class="col-md d-flex align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary align-middle">Deductions</h6>
+      </div>
+      <div class="col-md-2 float-right">
+        <a class="btn btn-success float-right" href="/lineitem/{{lineitem.id}}/add" role="button">Add Deduction</a>
+      </div>
+    </div>
   </div>
   <div class="card-body">
     <div class="table-responsive">
@@ -27,21 +42,14 @@
           {{#each deductions}}
           <tr>
             <td>{{timestamp}}</td>
-            <td>{{amount}}</td>
+            <td>{{formatMoney amount}}</td>
             <td>
-              <a class="btn btn-primary mr-1" href="/deduction/{{id}}" role="button">Edit</a><button class="btn btn-danger" role="button">Delete</button>
+              <a class="btn btn-primary mr-1" href="/deduction/{{id}}" role="button">Edit</a><button class="btn btn-danger delete" data-id="{{id}}" role="button">Delete</button>
             </td>
           </tr>
           {{/each}}
         </tbody>
       </table>
     </div>
-    <a class="btn btn-success" href="/lineitem/{{lineitem.id}}/add" role="button">Add Deduction</a>
   </div>
 </div>
-
-<script>
-  $(document).ready(function() {
-    $('#dataTable').DataTable();
-  });
-</script>

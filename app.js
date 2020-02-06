@@ -18,6 +18,7 @@ var loginRouter = require('./routes/login');
 var logoutRouter = require('./routes/logout');
 var budgetRouter = require('./routes/budget');
 var lineItemRouter = require('./routes/lineitem');
+var deductionRouter = require('./routes/deduction');
 
 var app = express();
 
@@ -26,7 +27,20 @@ app.engine(
   'hbs',
   hbs({
     helpers: {
-      multihelpers
+      multihelpers,
+      formatMoney: function (money) { 
+        let number = parseInt(money);
+        decSep = ".";
+        thouSep = ",";
+        var sign = number < 0 ? "-" : "";
+        var i = String(parseInt(number = Math.abs(Number(number) || 0).toFixed(2)));
+        var j = (j = i.length) > 3 ? j % 3 : 0;
+
+        return sign + "$" +
+          (j ? i.substr(0, j) + thouSep : "") +
+          i.substr(j).replace(/(\decSep{3})(?=\decSep)/g, "$1" + thouSep) +
+          (2 ? decSep + Math.abs(number - i).toFixed(2).slice(2) : "");
+      },
     },
     partialsDir: ["views/partials"],
     extname: ".hbs",
@@ -51,7 +65,8 @@ app.use('/club', clubRouter);
 app.use('/login', loginRouter);
 app.use('/logout', logoutRouter);
 app.use('/budget', budgetRouter);
-app.use('/lineitem', lineItemRouter)
+app.use('/lineitem', lineItemRouter);
+app.use('/deduction', deductionRouter);
 
 app.use(function(req, res, next) {
   res.render('404', {bypassLayout: true});

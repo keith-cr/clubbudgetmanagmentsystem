@@ -11,8 +11,10 @@ router.get('/:id', async function(req, res, next) {
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
       const result = await sql.query`select * from club where id=${id}`;
       const budgetYears = await sql.query`EXEC GET_BUDGETS_FOR_CLUB @ClubID=${id}`;
-      console.log(result.recordset[0]);
-      res.render('club', { title: result.recordset[0].Name, club: result.recordset[0], budgetYears: budgetYears.recordset });
+      if (result.recordset[0])
+        res.render('club', { title: result.recordset[0].Name, club: result.recordset[0], budgetYears: budgetYears.recordset });
+      else
+        next(); // couldn't find club, pass to 404 handler
     } catch (err) {
         console.log(err);
     }

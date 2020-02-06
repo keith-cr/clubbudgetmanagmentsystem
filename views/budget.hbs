@@ -2,6 +2,13 @@
   <h1 class="h3 mb-0 text-gray-800">{{budget.clubname}}'s {{budget.year}} Budget</h1>
 </div>
 
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/club/{{budget.clubid}}">{{budget.clubname}}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{budget.year}} Budget</li>
+  </ol>
+</nav>
+
 <div class="card shadow mb-4">
   <div class="card-header py-3">
     <h6 class="m-0 font-weight-bold text-primary">Line Items</h6>
@@ -36,9 +43,9 @@
           <tr>
             <td>{{number}}</td>
             <td>{{name}}</td>
-            <td>${{originalbalance}}</td>
-            <td>${{deductions}}</td>
-            <td>${{remainingbalance}}</td>
+            <td>{{formatMoney originalbalance}}</td>
+            <td>{{formatMoney deductions}}</td>
+            <td>{{formatMoney remainingbalance}}</td>
             <td>{{description}}</td>
             <td><a class="btn btn-primary" href="/lineitem/{{id}}" role="button">Edit</a></td>
           </tr>
@@ -48,9 +55,3 @@
     </div>
   </div>
 </div>
-
-<script>
-  $(document).ready(function() {
-    $('#dataTable').DataTable();
-  });
-</script>

@@ -2,6 +2,15 @@
   <h1 class="h3 mb-0 text-gray-800">Add Deduction for Line Item {{lineitem.number}}</h1>
 </div>
 
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/club/{{lineitem.clubid}}">{{lineitem.clubname}}</a></li>
+    <li class="breadcrumb-item"><a href="/budget/{{lineitem.budgetid}}">{{lineitem.budgetyear}}</a></li>
+    <li class="breadcrumb-item"><a href="/lineitem/{{lineitem.id}}">Line Item {{lineitem.number}}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Add Deduction</li>
+  </ol>
+</nav>
+
 {{#each successes}}
   <div class="alert alert-success" role="alert">
     {{this}}
@@ -41,5 +50,4 @@
 
     var submit_dom_element = document.getElementById('submit');
     submit_dom_element.addEventListener('click', submit);
-
 </script>
