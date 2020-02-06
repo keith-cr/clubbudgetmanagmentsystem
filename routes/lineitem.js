@@ -25,10 +25,27 @@ router.get('/:id/add', async function(req, res, next) {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
       const result = await sql.query`select l.id, l.number, club.id as clubid, budget.id as budgetid from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
-      res.render('adddeduction', { title: "Add Deduction", lineitem: result.recordset[0] });
+      res.render('adddeduction', { title: "Add Deduction", lineitem: result.recordset[0], errors: req.flash('error'), successes: req.flash('success'), });
     } catch (err) {
         console.log(err);
     }
+});
+
+/* POST add deduction page. */
+router.post('/:id/add', async function(req, res, next) {
+    let id = req.params["id"];
+    let amount = req.body.amount;
+    try {
+      await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
+        + process.env.DB_HOST + '/' + process.env.DB_NAME);
+      const result = await sql.query`select l.id as id, club.id as clubid, budget.id as budgetid from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
+      await sql.query`EXEC CREATE_DEDUCTION @ClubID = ${result.recordset[0].clubid}, @BudgetID = ${result.recordset[0].budgetid}, @LineItemID = ${result.recordset[0].id}, @amount = ${amount}`
+      req.flash('success', 'Deduction successfully added');
+    } catch (err) {
+        req.flash('error', 'Unknown error creating deduction');
+        console.log(err);
+    }
+    res.send('');
 });
 
 module.exports = router;
