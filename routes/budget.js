@@ -13,7 +13,7 @@ router.get('/:id', async function(req, res, next) {
       const lineitems = await sql.query`select l.number, l.originalbalance, l.description, l.name, l.otfr from lineitem l where l.budgetid=${id}`;
       console.log(result.recordset[0]);
       console.log(lineitems.recordset);
-      res.render('budget', { title:  result.recordset[0].Name + "'s " + result.recordset[0].Year + " Budget", budget: result.recordset[0], lineitems: lineitems.recordset });
+      res.render('budget', { title:  result.recordset[0].clubname + "'s " + result.recordset[0].year + " Budget", budget: result.recordset[0], lineitems: lineitems.recordset });
     } catch (err) {
         console.log(err);
     }

@@ -1,6 +1,53 @@
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
   <h1 class="h3 mb-0 text-gray-800">{{budget.clubname}}'s {{budget.year}} Budget</h1>
 </div>
-{{#each lineitems}}
-<p>{{number}} {{originalbalance}} {{description}} {{name}} {{otfr}}</p>
-{{/each}}
+
+<div class="card shadow mb-4">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Original Balance</th>
+            <th>Deductions</th>
+            <th>Current Balance</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Original Balance</th>
+            <th>Deductions</th>
+            <th>Current Balance</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </tfoot>
+        <tbody>
+          {{#each lineitems}}
+          <tr>
+            <td>{{number}}</td>
+            <td>{{name}}</td>
+            <td>{{originalbalance}}</td>
+            <td>$0</td>
+            <td>{{originalbalance}}</td>
+            <td>{{description}}</td>
+            <td><a class="btn btn-primary" href="/lineitem/{{id}}" role="button">Edit</a></td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('#dataTable').DataTable();
+  });
+</script>
