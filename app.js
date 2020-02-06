@@ -17,6 +17,7 @@ var clubRouter = require('./routes/club');
 var loginRouter = require('./routes/login');
 var logoutRouter = require('./routes/logout');
 var budgetRouter = require('./routes/budget');
+var lineItemRouter = require('./routes/lineitem');
 
 var app = express();
 
@@ -50,6 +51,7 @@ app.use('/club', clubRouter);
 app.use('/login', loginRouter);
 app.use('/logout', logoutRouter);
 app.use('/budget', budgetRouter);
+app.use('/lineitem', lineItemRouter)
 
 app.use(function(req, res, next) {
   res.render('404', {bypassLayout: true});

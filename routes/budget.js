@@ -10,9 +10,8 @@ router.get('/:id', async function(req, res, next) {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
       const result = await sql.query`select budget.year as year, club.name as clubname from budget join club on budget.clubid=club.id where budget.id=${id}`;
-      const lineitems = await sql.query`select l.number, l.originalbalance, l.description, l.name, l.otfr from lineitem l where l.budgetid=${id}`;
-      console.log(result.recordset[0]);
-      console.log(lineitems.recordset);
+      const lineitems = await sql.query`select l.number, l.originalbalance, l.description, l.name, l.otfr, l.id from lineitem l where l.budgetid=${id}`;
+      console.log(lineitems);
       res.render('budget', { title:  result.recordset[0].clubname + "'s " + result.recordset[0].year + " Budget", budget: result.recordset[0], lineitems: lineitems.recordset });
     } catch (err) {
         console.log(err);

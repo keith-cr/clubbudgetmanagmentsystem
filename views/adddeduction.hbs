@@ -1,0 +1,36 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800">Add Deduction for Line Item {{lineitem.number}}</h1>
+</div>
+
+<form>
+  <div class="form-group">
+    <label for="amountInput">Deduction Amount</label>
+    <input type="number" class="form-control" id="amountInput" aria-describedby="amountHelp">
+    <small id="amountHelp" class="form-text text-muted">To add money to the line item, input a negative amount.</small>
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<script>
+    function submit(e) {
+    var club_select_dom_element = document.getElementById('clubSelect');
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: window.location.pathname,
+            data: { amount: amount },
+            success: function() {
+            window.location.reload();
+            },
+            failure: function() {
+            window.location.reload();
+            },
+        });
+    }
+
+    var input_dom_element = document.getElementById('xlf');
+    input_dom_element.addEventListener('change', handleFile, false);
+    var submit_dom_element = document.getElementById('submit');
+    submit_dom_element.addEventListener('click', submit);
+
+</script>
