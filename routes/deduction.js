@@ -11,7 +11,7 @@ router.get('/:id', async function(req, res, next) {
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
       const result = await sql.query`select d.id, d.amount, l.id as lid, l.number, club.name as clubname, club.id as clubid, budget.id as budgetid, budget.year as budgetyear from deduction d join budget on d.budgetid=budget.id join club on d.clubid=club.id join lineitem l on l.id=d.lineitemid where d.id=${id}`;
       if (result.recordset[0])
-        res.render('updatededuction', { title: "Line Item " + result.recordset[0].number, deduction: result.recordset[0], errors: req.flash('error'), successes: req.flash('success') });
+        res.render('updatededuction', { user: req.user, title: "Line Item " + result.recordset[0].number, deduction: result.recordset[0], errors: req.flash('error'), successes: req.flash('success') });
       else
         next(); // couldn't find lineitem, pass to 404 handler
     } catch (err) {

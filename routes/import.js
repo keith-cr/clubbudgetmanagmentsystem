@@ -43,7 +43,7 @@ router.post('/', async function (req, res) {
       }
       req.flash('success', 'Budget file sucessfully imported');
     } catch (err) {
-      if (err.orginalError && err.originalError.info.message.includes("Violation of UNIQUE KEY"))
+      if (err.originalError && err.originalError.info.message.includes("Violation of UNIQUE KEY"))
         req.flash('error', 'Unable to import budget, budget year already exists for that club');
       else
         req.flash('error', 'Unknown error importing file');

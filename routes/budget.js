@@ -19,7 +19,7 @@ router.get('/:id', async function(req, res, next) {
           }
       }
       if (result.recordset[0])
-        res.render('budget', { title:  result.recordset[0].clubname + "'s " + result.recordset[0].year + " Budget", budget: result.recordset[0], lineitems: lineitems.recordset, customJs: 'budget.js' });
+        res.render('budget', { user: req.user, title:  result.recordset[0].clubname + "'s " + result.recordset[0].year + " Budget", budget: result.recordset[0], lineitems: lineitems.recordset, customJs: 'budget.js' });
       else
         next(); // couldn't find budget, pass to 404 handler
     } catch (err) {

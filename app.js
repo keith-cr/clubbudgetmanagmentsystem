@@ -9,18 +9,63 @@ const session = require('express-session');
 const hbs = require('express-handlebars');
 const hbshelpers = require('handlebars-helpers');
 const multihelpers = hbshelpers();
+const passport = require('passport');
+const Strategy = require('passport-local').Strategy;
+const passwordManager = require('./passwordManager');
+const sql = require('mssql');
+const ensureLogin = require('connect-ensure-login');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 var importRouter = require('./routes/import');
 var clubRouter = require('./routes/club');
 var loginRouter = require('./routes/login');
+var registerRouter = require('./routes/register');
 var logoutRouter = require('./routes/logout');
 var budgetRouter = require('./routes/budget');
 var lineItemRouter = require('./routes/lineitem');
 var deductionRouter = require('./routes/deduction');
 
 var app = express();
+
+passport.use(new Strategy(
+  async function(username, password, cb) {
+    try {
+      await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
+        + process.env.DB_HOST + '/' + process.env.DB_NAME);
+      const result = await sql.query`EXEC FIND_USER_BY_USERNAME @Username=${username}`;
+      if (result.recordset[0]) {
+        let user = result.recordset[0];
+        if (!passwordManager.comparePassword(password, user.Password))
+          return cb(null, false);
+        return cb(null, user);
+      }
+      else
+        return cb(null, false);
+    } catch (err) {
+      console.log(err);
+      return cb(err, false);
+    }
+  })
+);
+
+passport.serializeUser(function(user, cb) {
+  cb(null, user.ID);
+});
+
+passport.deserializeUser(async function(id, cb) {
+  try {
+    await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
+      + process.env.DB_HOST + '/' + process.env.DB_NAME);
+    const result = await sql.query`EXEC FIND_USER_BY_ID @UserID=${id}`;
+    if (result.recordset[0]) {
+      cb(null, result.recordset[0]);
+    } else {
+      cb(null, null);
+    }
+  } catch (err) {
+    cb(err, null);
+  }
+});
 
 // view engine setup
 app.engine(
@@ -55,18 +100,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: 'g^h$J*k%754hr6', resave: true, saveUninitialized: false }));
+app.use(session({ secret: 'g^h$J*k%754hr6', resave: false, saveUninitialized: false }));
 app.use(flash(app));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/import', importRouter);
-app.use('/club', clubRouter);
+app.use('/import', ensureLogin.ensureLoggedIn('/login'), importRouter);
+app.use('/club', ensureLogin.ensureLoggedIn('/login'), clubRouter);
 app.use('/login', loginRouter);
+app.use('/register', registerRouter);
 app.use('/logout', logoutRouter);
-app.use('/budget', budgetRouter);
-app.use('/lineitem', lineItemRouter);
-app.use('/deduction', deductionRouter);
+app.use('/budget', ensureLogin.ensureLoggedIn('/login'), budgetRouter);
+app.use('/lineitem', ensureLogin.ensureLoggedIn('/login'), lineItemRouter);
+app.use('/deduction', ensureLogin.ensureLoggedIn('/login'), deductionRouter);
 
 app.use(function(req, res, next) {
   res.render('404', {bypassLayout: true});

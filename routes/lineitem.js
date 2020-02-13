@@ -13,7 +13,7 @@ router.get('/:id', async function(req, res, next) {
       const deductions = await sql.query`select d.timestamp, d.amount, d.id from deduction d where d.lineitemid=${id}`;
       console.log(deductions);
       if (result.recordset[0])
-        res.render('lineitem', { title: "Line Item " + result.recordset[0].number, lineitem: result.recordset[0], deductions: deductions.recordset, customJs: 'lineitem.js' });
+        res.render('lineitem', { user: req.user, title: "Line Item " + result.recordset[0].number, lineitem: result.recordset[0], deductions: deductions.recordset, customJs: 'lineitem.js' });
       else
         next(); // couldn't find lineitem, pass to 404 handler
     } catch (err) {
@@ -28,7 +28,7 @@ router.get('/:id/add', async function(req, res, next) {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
       const result = await sql.query`select l.id, l.number, club.name as clubname, club.id as clubid, budget.id as budgetid, budget.year as budgetyear from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
-      res.render('adddeduction', { title: "Add Deduction", lineitem: result.recordset[0], errors: req.flash('error'), successes: req.flash('success'), });
+      res.render('adddeduction', { user: req.user, title: "Add Deduction", lineitem: result.recordset[0], errors: req.flash('error'), successes: req.flash('success'), });
     } catch (err) {
         console.log(err);
     }

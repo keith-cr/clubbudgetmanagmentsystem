@@ -3,8 +3,9 @@ var router = express.Router();
 var sql = require('mssql');
 require('dotenv').config();
 
-/* GET login page. */
+/* GET logout page. */
 router.get('/', async function(req, res, next) {
+  req.logout();
   res.redirect('/login');
 });
 
