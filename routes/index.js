@@ -8,9 +8,8 @@ const ensureLogin = require('connect-ensure-login');
 router.get('/', ensureLogin.ensureLoggedIn('/login'), async function(req, res, next) {
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
-        + process.env.DB_HOST + '/' + process.env.DB_NAME)
-      const result = await sql.query`select * from club`
-      console.log(result.recordset);
+        + process.env.DB_HOST + '/' + process.env.DB_NAME);
+      const result = await sql.query`EXEC CLUBS_FOR_USER @UserID=${req.user.ID}`;
       res.render('index', { user: req.user, title: 'Clubs', data: result.recordset, clubsPage: true });
     } catch (err) {
       console.log(err)

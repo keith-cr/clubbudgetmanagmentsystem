@@ -74,7 +74,7 @@ app.engine(
     helpers: {
       multihelpers,
       formatMoney: function (money) { 
-        let number = parseInt(money);
+        let number = parseFloat(money);
         decSep = ".";
         thouSep = ",";
         var sign = number < 0 ? "-" : "";
@@ -117,7 +117,7 @@ app.use('/lineitem', ensureLogin.ensureLoggedIn('/login'), lineItemRouter);
 app.use('/deduction', ensureLogin.ensureLoggedIn('/login'), deductionRouter);
 
 app.use(function(req, res, next) {
-  res.render('404', {bypassLayout: true});
+  res.render('404', {bypassLayout: true, title: '404 Error'});
 });
 
 // error handler

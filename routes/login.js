@@ -12,7 +12,7 @@ router.get('/', async function(req, res, next) {
 });
 
 router.post('/',
-  passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login', failureFlash: 'Invalid username or password.' })
+  passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login', failureFlash: 'Invalid username or password' })
 );
 
 module.exports = router;

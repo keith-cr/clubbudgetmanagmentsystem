@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var sql = require('mssql');
+const sql = require('mssql');
+const accessControl = require('../accessControl');
 require('dotenv').config();
 
 /* GET import page. */
@@ -8,10 +9,10 @@ router.get('/', async function(req, res, next) {
   try {
     await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
       + process.env.DB_HOST + '/' + process.env.DB_NAME)
-    const result = await sql.query`select * from club`
+    const result = await sql.query`EXEC CLUBS_FOR_USER @UserID=${req.user.ID}`
     res.render('import', {title: 'Import', errors: req.flash('error'), successes: req.flash('success'), clubs: result.recordset, importPage: true});
   } catch (err) {
-    console.log(err)
+    console.log(err);
   }
 });
 
@@ -26,6 +27,10 @@ router.post('/', async function (req, res) {
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
+      let hasAccess = await accessControl.isMemberOfClub(req.user.ID, clubid);
+      if (!hasAccess) {
+        return req.flash('error', 'Unable to import budget, improper permissions');;
+      }
       await sql.query`EXEC CREATE_BUDGET @Year = ${year}, @ClubID = ${clubid}`;
       let result = await sql.query`select ID from BUDGET where Year = ${year} and ClubID = ${clubid}`
       let budgetID = result.recordset[0].ID;

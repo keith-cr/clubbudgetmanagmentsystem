@@ -1,11 +1,16 @@
 var express = require('express');
 var router = express.Router();
-var sql = require('mssql');
+const sql = require('mssql');
+const accessControl = require('../accessControl');
 require('dotenv').config();
 
 /* GET club page. */
 router.get('/:id', async function(req, res, next) {
     let id = req.params["id"];
+    let hasAccess = await accessControl.isMemberOfClub(req.user.ID, id);
+    if (!hasAccess) {
+      return next();
+    }
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);

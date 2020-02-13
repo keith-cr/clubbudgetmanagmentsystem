@@ -14,13 +14,18 @@ router.post('/', async function(req, res, next) {
   const username = req.body.username;
   const password = req.body.username;
   try {
-    await
     await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
       + process.env.DB_HOST + '/' + process.env.DB_NAME);
     let encryptedPassword = await passwordManager.cryptPassword(password);
-    await sql.query`EXEC CREATE_USER @Username = ${username}, @Password = ${encryptedPassword}`;
-    req.flash('success', 'Registration successful, you can now login');
-    res.redirect('/register');
+    let result = await sql.query`EXEC CREATE_USER @Username = ${username}, @Password = ${encryptedPassword}`;
+    req.login(result.recordset[0], function(err) {
+      if (err) {
+         console.log(err);
+         req.flash('error', 'Registration successful, but login failed, please try to login');
+         req.redirect('/login');
+      }
+      res.redirect('/'); 
+    });
   } catch (err) {
     console.log(err);
     if (err.originalError && err.originalError.info.message.includes("Violation of UNIQUE KEY"))
