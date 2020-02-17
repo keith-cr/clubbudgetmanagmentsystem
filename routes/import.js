@@ -32,14 +32,14 @@ router.post('/', async function (req, res) {
         return req.flash('error', 'Unable to import budget, improper permissions');;
       }
       await sql.query`EXEC CREATE_BUDGET @Year = ${year}, @ClubID = ${clubid}`;
-      let result = await sql.query`select ID from BUDGET where Year = ${year} and ClubID = ${clubid}`
+      let result = await sql.query`EXEC GET_BUDGET_ID @ClubID=${clubid}, @Year=${year}`;//select ID from BUDGET where Year = ${year} and ClubID = ${clubid}`
       let budgetID = result.recordset[0].ID;
       for (let category of categories) {
         await sql.query`EXEC CREATE_CATEGORY @BudgetID = ${budgetID}, @Name = ${category.name}, @Number = ${category.number}`;
       }
       for (let lineItem of lineItems) {
         let catNum = Math.floor(parseFloat(lineItem.number));
-        let catResult = await sql.query`select ID from Category where BudgetID = ${budgetID} and Number = ${catNum}`;
+        let catResult = await sql.query`EXEC GET_CATEGORY_ID @BudgetID=${budgetID}, @CatNum=${catNum}`;//select ID from Category where BudgetID = ${budgetID} and Number = ${catNum}`;
         let catID = catResult.recordset[0].ID;
         console.log(lineItem.number);
         await sql.query`EXEC CREATE_LineItem @ClubID = ${clubid}, @BudgetID = ${result.recordset[0].ID}, 

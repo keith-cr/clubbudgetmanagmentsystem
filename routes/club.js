@@ -14,7 +14,7 @@ router.get('/:id', async function(req, res, next) {
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
-      const result = await sql.query`select * from club where id=${id}`;
+      const result = await sql.query`EXEC GET_CLUB_INFORMATION @ID=${id}`;//select * from club where id=${id}`;
       const budgetYears = await sql.query`EXEC GET_BUDGETS_FOR_CLUB @ClubID=${id}`;
       if (result.recordset[0])
         res.render('club', { user: req.user, title: result.recordset[0].Name, club: result.recordset[0], budgetYears: budgetYears.recordset });

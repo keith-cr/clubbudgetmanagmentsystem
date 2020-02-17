@@ -10,8 +10,8 @@ router.get('/:id', async function(req, res, next) {
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
-      const result = await sql.query`select l.id, l.number, l.originalbalance, club.name as clubname, club.id as clubid, budget.id as budgetid, budget.year as budgetyear from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
-      const deductions = await sql.query`select d.timestamp, d.amount, d.id from deduction d where d.lineitemid=${id}`;
+      const result = await sql.query`EXEC GET_LINEITEMS_FROM_BUDGET @BudgetID_1=${id}`;//select l.id, l.number, l.originalbalance, club.name as clubname, club.id as clubid, budget.id as budgetid, budget.year as budgetyear from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
+      const deductions = await sql.query`EXEC GET_DEDUCTION_INFORMATION_FOR_LINEITEM @BudgetID=${id}`;//select d.timestamp, d.amount, d.id from deduction d where d.lineitemid=${id}`;
       console.log(deductions);
       if (result.recordset[0]) {
         let hasAccess = await accessControl.isMemberOfClub(req.user.ID, result.recordset[0].clubid);
@@ -32,7 +32,7 @@ router.get('/:id/add', async function(req, res, next) {
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
-      const result = await sql.query`select l.id, l.number, club.name as clubname, club.id as clubid, budget.id as budgetid, budget.year as budgetyear from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
+      const result = await sql.query`EXEC GET_LINEITEM_INFORMATION @ID=${id}`;//select l.id, l.number, club.name as clubname, club.id as clubid, budget.id as budgetid, budget.year as budgetyear from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
       let hasAccess = await accessControl.isMemberOfClub(req.user.ID, result.recordset[0].clubid);
       if (!hasAccess) {
         return next();
@@ -50,7 +50,7 @@ router.post('/:id/add', async function(req, res, next) {
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
-      const result = await sql.query`select l.id as id, club.id as clubid, budget.id as budgetid from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
+      const result = await sql.query`EXEC GET_LINEITEM_INFORMATION @ID=${id}`;//select l.id as id, club.id as clubid, budget.id as budgetid from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
       let hasAccess = await accessControl.isMemberOfClub(req.user.ID, result.recordset[0].clubid);
       if (!hasAccess) {
         return req.flash('error', 'Improper permissions to create deduction');

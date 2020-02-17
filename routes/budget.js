@@ -10,7 +10,7 @@ router.get('/:id', async function(req, res, next) {
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
-      const result = await sql.query`select budget.year as year, club.name as clubname, budget.id, club.id as clubid from budget join club on budget.clubid=club.id where budget.id=${id}`;
+      const result = await sql.query`EXEC GET_BUDGET_INFORMATION @ID=${id}`;//select budget.year as year, club.name as clubname, budget.id, club.id as clubid from budget join club on budget.clubid=club.id where budget.id=${id}`;
       const lineitems = await sql.query`EXEC GET_LINEITEMS_FROM_BUDGET @BudgetID_1=${id}`;
       for (lineitem of lineitems.recordset) {
           if(lineitem.remainingbalance==null) {

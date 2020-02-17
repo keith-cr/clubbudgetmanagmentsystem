@@ -10,7 +10,7 @@ router.get('/:id', async function(req, res, next) {
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
-      const result = await sql.query`select d.id, d.amount, l.id as lid, l.number, club.name as clubname, club.id as clubid, budget.id as budgetid, budget.year as budgetyear from deduction d join budget on d.budgetid=budget.id join club on d.clubid=club.id join lineitem l on l.id=d.lineitemid where d.id=${id}`;
+      const result = await sql.query`EXEC GET_DEDUCTION_INFORMATION @ID=${id}`;//select d.id, d.amount, l.id as lid, l.number, club.name as clubname, club.id as clubid, budget.id as budgetid, budget.year as budgetyear from deduction d join budget on d.budgetid=budget.id join club on d.clubid=club.id join lineitem l on l.id=d.lineitemid where d.id=${id}`;
       if (result.recordset[0]) {
         let hasAccess = await accessControl.isMemberOfClub(req.user.ID, result.recordset[0].clubid);
         if (!hasAccess) {
