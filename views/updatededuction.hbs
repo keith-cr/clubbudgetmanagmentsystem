@@ -24,6 +24,10 @@
 
 <form>
   <div class="form-group">
+    <label for="datepicker">Date</label>
+    <input id="datepicker" width="276" />
+  </div>
+  <div class="form-group">
     <label for="amountInput">Deduction Amount</label>
     <input type="number" value="{{deduction.amount}}" class="form-control" id="amountInput" aria-describedby="amountHelp">
     <small id="amountHelp" class="form-text text-muted">To add money to the line item, input a negative amount.</small>
@@ -32,21 +36,24 @@
 </form>
 
 <script>
-    function submit(e) {
-        var deduction_amount_dom_element = document.getElementById('amountInput');
-        e.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: window.location.pathname,
-            data: { amount: deduction_amount_dom_element.value },
-            success: function() {
-                window.location.reload();
-            },
-            failure: function() {
-                window.location.reload();
-            },
-        });
-    }
+  $('#datepicker').datepicker({
+            uiLibrary: 'bootstrap4'
+  });
+  function submit(e) {
+      var deduction_amount_dom_element = document.getElementById('amountInput');
+      e.preventDefault();
+      $.ajax({
+          type: 'POST',
+          url: window.location.pathname,
+          data: { amount: deduction_amount_dom_element.value },
+          success: function() {
+              window.location.reload();
+          },
+          failure: function() {
+              window.location.reload();
+          },
+      });
+  }
 
     var submit_dom_element = document.getElementById('submit');
     submit_dom_element.addEventListener('click', submit);

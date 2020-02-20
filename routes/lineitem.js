@@ -10,9 +10,8 @@ router.get('/:id', async function(req, res, next) {
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
-      const result = await sql.query`EXEC GET_LINEITEMS_FROM_BUDGET @BudgetID_1=${id}`;//select l.id, l.number, l.originalbalance, club.name as clubname, club.id as clubid, budget.id as budgetid, budget.year as budgetyear from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
-      const deductions = await sql.query`EXEC GET_DEDUCTION_INFORMATION_FOR_LINEITEM @BudgetID=${id}`;//select d.timestamp, d.amount, d.id from deduction d where d.lineitemid=${id}`;
-      console.log(deductions);
+      const result = await sql.query`EXEC GET_LINEITEM @id=${id}`;//select l.id, l.number, l.originalbalance, club.name as clubname, club.id as clubid, budget.id as budgetid, budget.year as budgetyear from lineitem l join budget on l.budgetid=budget.id join club on budget.clubid=club.id where l.id=${id}`;
+      const deductions = await sql.query`EXEC GET_DEDUCTION_INFORMATION_FOR_LINEITEM @id=${id}`;//select d.timestamp, d.amount, d.id from deduction d where d.lineitemid=${id}`;
       if (result.recordset[0]) {
         let hasAccess = await accessControl.isMemberOfClub(req.user.ID, result.recordset[0].clubid);
         if (!hasAccess) {

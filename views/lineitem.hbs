@@ -41,7 +41,7 @@
         <tbody>
           {{#each deductions}}
           <tr>
-            <td>{{timestamp}}</td>
+            <td>{{formatDate timestamp}}</td>
             <td>{{formatMoney amount}}</td>
             <td>
               <a class="btn btn-primary mr-1" href="/deduction/{{id}}" role="button">Edit</a><button class="btn btn-danger delete" data-id="{{id}}" role="button">Delete</button>

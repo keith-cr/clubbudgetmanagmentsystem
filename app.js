@@ -14,6 +14,7 @@ const Strategy = require('passport-local').Strategy;
 const passwordManager = require('./passwordManager');
 const sql = require('mssql');
 const ensureLogin = require('connect-ensure-login');
+const moment = require('moment');
 
 var indexRouter = require('./routes/index');
 var importRouter = require('./routes/import');
@@ -86,6 +87,9 @@ app.engine(
           i.substr(j).replace(/(\decSep{3})(?=\decSep)/g, "$1" + thouSep) +
           (2 ? decSep + Math.abs(number - i).toFixed(2).slice(2) : "");
       },
+      formatDate: function (date) {
+        return moment(date).format('MMMM Do YYYY');
+      }
     },
     partialsDir: ["views/partials"],
     extname: ".hbs",

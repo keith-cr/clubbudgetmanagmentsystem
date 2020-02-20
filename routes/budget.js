@@ -33,4 +33,47 @@ router.get('/:id', async function(req, res, next) {
     }
 });
 
+/* GET add lineitem page. */
+router.get('/:id/add', async function(req, res, next) {
+  let id = req.params["id"];
+  try {
+    await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
+      + process.env.DB_HOST + '/' + process.env.DB_NAME);
+    const result = await sql.query`EXEC GET_BUDGET_INFORMATION @ID=${id}`;//select budget.year as year, club.name as clubname, budget.id, club.id as clubid from budget join club on budget.clubid=club.id where budget.id=${id}`;
+    const categories = await sql.query`EXEC GET_CATEGORIES_FOR_BUDGET @BudgetID=${id}`;
+    let hasAccess = await accessControl.isMemberOfClub(req.user.ID, result.recordset[0].clubid);
+    if (!hasAccess) {
+      return next();
+    }
+    res.render('addlineitem', { user: req.user, title: "Add Line Item", budget: result.recordset[0], categories: categories.recordset, errors: req.flash('error'), successes: req.flash('success'), });
+  } catch (err) {
+      console.log(err);
+  }
+});
+
+/* POST add lineitem page. */
+router.post('/:id/add', async function(req, res, next) {
+  let id = req.params["id"];
+  let number = req.body.number;
+  let catID = req.body.categorySelect;
+  let originalBal = req.body.originalBal;
+  let description = req.body.description;
+  let name = req.body.name;
+  try {
+    await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
+      + process.env.DB_HOST + '/' + process.env.DB_NAME);
+    const result = await sql.query`EXEC GET_BUDGET_INFORMATION @ID=${id}`;//select budget.year as year, club.name as clubname, budget.id, club.id as clubid from budget join club on budget.clubid=club.id where budget.id=${id}`;
+    let hasAccess = await accessControl.isMemberOfClub(req.user.ID, result.recordset[0].clubid);
+    if (!hasAccess) {
+      return req.flash('error', 'Improper permissions to create line item');
+    }
+    await sql.query`EXEC CREATE_LINEITEM @ClubID = ${result.recordset[0].clubid}, @BudgetID = ${result.recordset[0].id}, @Name = ${name}, @Description = ${description}, @CategoryID = ${catID}, @Number = ${number}, @OriginalBalance = ${originalBal}`;
+    req.flash('success', 'Line Item successfully added');
+  } catch (err) {
+      req.flash('error', 'Unknown error creating Line Item');
+      console.log(err);
+  }
+  res.send('');
+});
+
 module.exports = router;
