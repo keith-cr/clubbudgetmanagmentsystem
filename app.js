@@ -25,6 +25,7 @@ var logoutRouter = require('./routes/logout');
 var budgetRouter = require('./routes/budget');
 var lineItemRouter = require('./routes/lineitem');
 var deductionRouter = require('./routes/deduction');
+var categoryRouter = require('./routes/category');
 
 var app = express();
 
@@ -88,7 +89,10 @@ app.engine(
           (2 ? decSep + Math.abs(number - i).toFixed(2).slice(2) : "");
       },
       formatDate: function (date) {
-        return moment(date).format('MMMM Do YYYY');
+        return moment(date).add('1', 'd').format('MMMM Do YYYY');
+      },
+      formatDateSlash: function (date) {
+        return moment(date).add('1', 'd').format('MM/DD/YYYY');
       }
     },
     partialsDir: ["views/partials"],
@@ -119,6 +123,7 @@ app.use('/logout', logoutRouter);
 app.use('/budget', ensureLogin.ensureLoggedIn('/login'), budgetRouter);
 app.use('/lineitem', ensureLogin.ensureLoggedIn('/login'), lineItemRouter);
 app.use('/deduction', ensureLogin.ensureLoggedIn('/login'), deductionRouter);
+app.use('/category', ensureLogin.ensureLoggedIn('/login'), categoryRouter);
 
 app.use(function(req, res, next) {
   res.render('404', {bypassLayout: true, title: '404 Error'});
@@ -132,7 +137,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render('error', { title: "Error" });
 });
 
 module.exports = app;

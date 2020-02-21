@@ -20,16 +20,22 @@ router.post('/', async function (req, res) {
     let body = req.body;
     let year = body.year;
     let clubid = body.clubid;
+    let clubname = body.clubname;
     let categories = JSON.parse(body.categories);
     let lineItems = JSON.parse(body.lineItems);
-    console.log(categories);
-    console.log(lineItems);
+    console.log(clubname);
     try {
       await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
         + process.env.DB_HOST + '/' + process.env.DB_NAME);
-      let hasAccess = await accessControl.isMemberOfClub(req.user.ID, clubid);
-      if (!hasAccess) {
-        return req.flash('error', 'Unable to import budget, improper permissions');;
+      if (clubid == -1) {
+        let club = await sql.query`EXEC CREATE_CLUB @Name = ${clubname}`;
+        clubid = club.recordset[0].id;
+        await sql.query`EXEC CREATE_MEMBEROF @ClubID = ${clubid}, @UserID = ${req.user.ID}`
+      } else {
+        let hasAccess = await accessControl.isMemberOfClub(req.user.ID, clubid);
+        if (!hasAccess) {
+          return req.flash('error', 'Unable to import budget, improper permissions');;
+        }
       }
       await sql.query`EXEC CREATE_BUDGET @Year = ${year}, @ClubID = ${clubid}`;
       let result = await sql.query`EXEC GET_BUDGET_ID @ClubID=${clubid}, @Year=${year}`;//select ID from BUDGET where Year = ${year} and ClubID = ${clubid}`

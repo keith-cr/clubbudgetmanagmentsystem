@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const sql = require('mssql');
 const accessControl = require('../accessControl');
+const moment = require('moment');
 require('dotenv').config();
 
 /* GET deduction page. */
@@ -16,7 +17,7 @@ router.get('/:id', async function(req, res, next) {
         if (!hasAccess) {
           return next();
         }
-        res.render('updatededuction', { user: req.user, title: "Line Item " + result.recordset[0].number, deduction: result.recordset[0], errors: req.flash('error'), successes: req.flash('success') });
+        res.render('updatededuction', { user: req.user, customJs: "updatededuction.js", title: "Update Deduction", deduction: result.recordset[0], errors: req.flash('error'), successes: req.flash('success') });
       } else
         next(); // couldn't find lineitem, pass to 404 handler
     } catch (err) {
@@ -28,10 +29,11 @@ router.get('/:id', async function(req, res, next) {
 router.post('/:id', async function(req, res, next) {
   let id = req.params["id"];
   let amount = req.body.amount;
+  let timestamp = req.body.timestamp;
   try {
     await sql.connect('mssql://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@' 
       + process.env.DB_HOST + '/' + process.env.DB_NAME);
-    await sql.query`EXEC UPDATE_DEDUCTION @ID = ${id}, @amount = ${amount}`;
+    await sql.query`EXEC UPDATE_DEDUCTION @ID = ${id}, @amount = ${amount}, @TimeStamp = ${moment(timestamp).toDate()}`;
     req.flash('success', 'Deduction successfully updated');
   } catch (err) {
       req.flash('error', 'Unknown error updating deduction');

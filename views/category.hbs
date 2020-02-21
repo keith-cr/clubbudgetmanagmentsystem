@@ -1,0 +1,59 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800">{{category.Name}}</h1>
+</div>
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/club/{{category.clubid}}">{{category.clubname}}</a></li>
+    <li class="breadcrumb-item"><a href="/budget/{{category.budgetid}}">{{category.budgetyear}} Budget</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{category.Name}}</li>
+  </ol>
+</nav>
+
+{{#each successes}}
+  <div class="alert alert-success" role="alert">
+    {{this}}
+  </div>
+{{/each}}
+{{#each errors}}
+  <div class="alert alert-danger" role="alert">
+    {{this}}
+  </div>
+{{/each}}
+
+<form>
+  <div class="form-group">
+    <label for="number">Number</label>
+    <input type="number" class="form-control" value="{{category.Number}}" id="number">
+  </div>
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" class="form-control" value="{{category.Name}}" id="name">
+  </div>
+  <button type="submit" class="btn btn-primary mb-4" id="submit">Submit</button>
+</form>
+
+<script>
+    function submit(e) {
+        var number_dom_element = document.getElementById('number');
+        var name_dom_element = document.getElementById('name');
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: window.location.pathname,
+            data: { 
+              number: number_dom_element.value, 
+              name: name_dom_element.value,
+            },
+            success: function() {
+                window.location.reload();
+            },
+            failure: function() {
+                window.location.reload();
+            },
+        });
+    }
+
+    var submit_dom_element = document.getElementById('submit');
+    submit_dom_element.addEventListener('click', submit);
+</script>

@@ -9,6 +9,17 @@
   </ol>
 </nav>
 
+{{#each successes}}
+  <div class="alert alert-success" role="alert">
+    {{this}}
+  </div>
+{{/each}}
+{{#each errors}}
+  <div class="alert alert-danger" role="alert">
+    {{this}}
+  </div>
+{{/each}}
+
 <div class="card shadow mb-4">
   <div class="card-header py-3 container-fluid">
     <div class="row">
@@ -27,6 +38,7 @@
           <tr>
             <th>Number</th>
             <th>Name</th>
+            <th>Category</th>
             <th>Original Balance</th>
             <th>Deductions</th>
             <th>Current Balance</th>
@@ -38,6 +50,7 @@
           <tr>
             <th>Number</th>
             <th>Name</th>
+            <th>Category</th>
             <th>Original Balance</th>
             <th>Deductions</th>
             <th>Current Balance</th>
@@ -50,11 +63,54 @@
           <tr>
             <td>{{number}}</td>
             <td>{{name}}</td>
+            <td>{{CatName}}</td>
             <td>{{formatMoney originalbalance}}</td>
             <td>{{formatMoney deductions}}</td>
             <td>{{formatMoney remainingbalance}}</td>
             <td>{{description}}</td>
-            <td><a class="btn btn-primary" href="/lineitem/{{id}}" role="button">Edit</a></td>
+            <td><a class="btn btn-primary mr-1 mb-1" href="/lineitem/{{id}}" role="button">Edit</a><button class="btn btn-danger delete" data-id="{{id}}" role="button">Delete</button></td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow mb-4">
+  <div class="card-header py-3 container-fluid">
+    <div class="row">
+      <div class="col-md d-flex align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">Categories</h6>
+      </div>
+      <div class="col-md-2 float-right">
+          <a class="btn btn-success float-right" href="/budget/{{budget.id}}/addCat" role="button">Add Category</a>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered" id="dataTableCat" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Actions</th>
+          </tr>
+        </tfoot>
+        <tbody>
+          {{#each categories}}
+          <tr>
+            <td>{{Number}}</td>
+            <td>{{Name}}</td>
+            <td><a class="btn btn-primary mr-1" href="/category/{{ID}}" role="button">Edit</a><button class="btn btn-danger deleteCat" data-id="{{ID}}" role="button">Delete</button></td>
           </tr>
           {{/each}}
         </tbody>

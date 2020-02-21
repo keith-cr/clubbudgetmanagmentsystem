@@ -1,13 +1,11 @@
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-  <h1 class="h3 mb-0 text-gray-800">Add Deduction for Line Item {{lineitem.number}}</h1>
+  <h1 class="h3 mb-0 text-gray-800">Add Budget for {{club.Name}}</h1>
 </div>
 
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/club/{{lineitem.clubid}}">{{lineitem.clubname}}</a></li>
-    <li class="breadcrumb-item"><a href="/budget/{{lineitem.budgetid}}">{{lineitem.budgetyear}} Budget</a></li>
-    <li class="breadcrumb-item"><a href="/lineitem/{{lineitem.id}}">Line Item {{lineitem.number}}</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Add Deduction</li>
+    <li class="breadcrumb-item"><a href="/club/{{club.ID}}">{{club.Name}}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Add Budget</li>
   </ol>
 </nav>
 
@@ -24,21 +22,22 @@
 
 <form>
   <div class="form-group">
-    <label for="amountInput">Deduction Amount</label>
-    <input type="number" class="form-control" id="amountInput" aria-describedby="amountHelp">
-    <small id="amountHelp" class="form-text text-muted">To add money to the line item, input a negative amount.</small>
+    <label for="year">Year</label>
+    <input type="number" class="form-control" id="year">
   </div>
   <button type="submit" class="btn btn-primary" id="submit">Submit</button>
 </form>
 
 <script>
     function submit(e) {
-        var deduction_amount_dom_element = document.getElementById('amountInput');
+        var year_dom_element = document.getElementById('year');
         e.preventDefault();
         $.ajax({
             type: 'POST',
             url: window.location.pathname,
-            data: { amount: deduction_amount_dom_element.value },
+            data: { 
+              year: year.value, 
+            },
             success: function() {
                 window.location.reload();
             },

@@ -16,6 +16,7 @@
   <div class="form-group">
     <label for="clubSelect">Club</label>
     <select class="form-control" id="clubSelect">
+      <option selected value=-1>New Club</option>
       {{#each clubs}}
         <option value={{ID}}>{{Name}}</option>
       {{/each}}
@@ -27,6 +28,8 @@
 <script lang="javascript" src="/js/xlsx.full.min.js"></script>
 <script>
 var year;
+var clubname;
+
 function Category(number, name) {
   this.number = number;
   this.name = name;
@@ -47,51 +50,56 @@ function handleFile(e) {
   var files = e.target.files, f = files[0];
   var reader = new FileReader();
   reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, {type: 'array'});
 
-    var data = new Uint8Array(e.target.result);
-    var workbook = XLSX.read(data, {type: 'array'});
+      var first_sheet_name = workbook.SheetNames[0];
+      var address_of_cell = 'A3';
+      var worksheet = workbook.Sheets[first_sheet_name];
+      var desired_cell = worksheet[address_of_cell];
+      var fiscalyear = (desired_cell ? desired_cell.v : undefined);
 
-    var first_sheet_name = workbook.SheetNames[0];
-    var address_of_cell = 'A3';
-    var worksheet = workbook.Sheets[first_sheet_name];
-    var desired_cell = worksheet[address_of_cell];
-    var fiscalyear = (desired_cell ? desired_cell.v : undefined);
+      address_of_cell = 'A1';
+      desired_cell = worksheet[address_of_cell];
+      clubname = (desired_cell ? desired_cell.v : undefined);
 
-    var numBlanks = 0;
+      var numBlanks = 0;
 
-    for(var R = 3; R <= 1000; ++R) {
-      var firstCell = worksheet[XLSX.utils.encode_cell({c:0, r:R})];
+      for(var R = 3; R <= 1000; ++R) {
+        var firstCell = worksheet[XLSX.utils.encode_cell({c:0, r:R})];
 
-      if (firstCell == null || firstCell.v === "") {
-        // blank
-        numBlanks++;
-      } else if (Number.isInteger(firstCell.v)) {
-        // category
-        numBlanks = 0;
-        var catName = worksheet[XLSX.utils.encode_cell({c:1, r:R})].v;
-        categories.push(new Category(firstCell.v, catName));
-      } else if (!isNaN(firstCell.v)) {
-        // line item
-        numBlanks = 0;
-        var name = worksheet[XLSX.utils.encode_cell({c:1, r:R})].v;
-        var desc = worksheet[XLSX.utils.encode_cell({c:7, r:R})].v;
-        var originalBal = worksheet[XLSX.utils.encode_cell({c:5, r:R})].v;
-        console.log(firstCell.v);
-        lineItems.push(new LineItem(firstCell.v, name, desc, originalBal));
-      } else {
-        // other
-        numBlanks = 0;
+        if (firstCell == null || firstCell.v === "") {
+          // blank
+          numBlanks++;
+        } else if (Number.isInteger(firstCell.v)) {
+          // category
+          numBlanks = 0;
+          var catName = worksheet[XLSX.utils.encode_cell({c:1, r:R})].v;
+          categories.push(new Category(firstCell.v, catName));
+        } else if (!isNaN(firstCell.v)) {
+          // line item
+          numBlanks = 0;
+          var name = worksheet[XLSX.utils.encode_cell({c:1, r:R})].v;
+          var desc = worksheet[XLSX.utils.encode_cell({c:7, r:R})].v;
+          var originalBal = worksheet[XLSX.utils.encode_cell({c:5, r:R})].v;
+          lineItems.push(new LineItem(firstCell.v, name, desc, originalBal));
+        } else {
+          // other
+          numBlanks = 0;
+        }
+
+        if (numBlanks > 3) {
+          // if we have more than 3 blank lines, assume we've reached end of spreadsheet
+          break;
+        }
       }
 
-      if (numBlanks > 3) {
-        // if we have more than 3 blank lines, assume we've reached end of spreadsheet
-        break;
-      }
+      const regex = /\d+/;
+      year = fiscalyear.match(regex)[0];
+    } catch (error) {
+      alert('Failed to extract data from file.');
     }
-
-
-    const regex = /\d+/;
-    year = fiscalyear.match(regex)[0];
   };
   reader.readAsArrayBuffer(f);
 }
@@ -102,7 +110,7 @@ function submit(e) {
   $.ajax({
     type: 'POST',
     url: '/import',
-    data: { year: year, clubid: club_select_dom_element.value, lineItems: JSON.stringify(lineItems), categories: JSON.stringify(categories) },
+    data: { year: year, clubname: clubname, clubid: club_select_dom_element.value, lineItems: JSON.stringify(lineItems), categories: JSON.stringify(categories) },
     success: function() {
       window.location.reload();
     },

@@ -5,7 +5,7 @@
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="/club/{{deduction.clubid}}">{{deduction.clubname}}</a></li>
-    <li class="breadcrumb-item"><a href="/budget/{{deduction.budgetid}}">{{deduction.budgetyear}}</a></li>
+    <li class="breadcrumb-item"><a href="/budget/{{deduction.budgetid}}">{{deduction.budgetyear}} Budget</a></li>
     <li class="breadcrumb-item"><a href="/lineitem/{{deduction.lid}}">Line Item {{deduction.number}}</a></li>
     <li class="breadcrumb-item active" aria-current="page">Update Deduction</li>
   </ol>
@@ -25,7 +25,7 @@
 <form>
   <div class="form-group">
     <label for="datepicker">Date</label>
-    <input id="datepicker" width="276" />
+    <input id="datepicker" value={{formatDateSlash deduction.timestamp}} width="276" />
   </div>
   <div class="form-group">
     <label for="amountInput">Deduction Amount</label>
@@ -34,27 +34,3 @@
   </div>
   <button type="submit" class="btn btn-primary" id="submit">Submit</button>
 </form>
-
-<script>
-  $('#datepicker').datepicker({
-            uiLibrary: 'bootstrap4'
-  });
-  function submit(e) {
-      var deduction_amount_dom_element = document.getElementById('amountInput');
-      e.preventDefault();
-      $.ajax({
-          type: 'POST',
-          url: window.location.pathname,
-          data: { amount: deduction_amount_dom_element.value },
-          success: function() {
-              window.location.reload();
-          },
-          failure: function() {
-              window.location.reload();
-          },
-      });
-  }
-
-    var submit_dom_element = document.getElementById('submit');
-    submit_dom_element.addEventListener('click', submit);
-</script>
